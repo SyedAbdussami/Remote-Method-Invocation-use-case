@@ -1,5 +1,6 @@
 package com.Concordia;
 
+import com.Concordia.Core.Directory;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -10,7 +11,7 @@ import java.io.PrintWriter;
 import java.net.*;
 import java.util.*;
 
-public class EdgeServer {
+public class EdgeServer implements Directory {
     DatagramSocket udpSocket;
     boolean discoveryPhase = true;
 
@@ -32,7 +33,7 @@ public class EdgeServer {
 
     public static void main(String[] args) throws IOException {
         int port = 6661;
-        int tcpPort=8000;
+        int tcpPort = 8000;
         EdgeServer server = new EdgeServer();
         System.out.println("Server up and running");
         server.start(port);
@@ -42,7 +43,6 @@ public class EdgeServer {
             server.clientHandler(tcpPort);
         }
     }
-
 }
 
 class PeerHandler extends Thread {
@@ -132,6 +132,7 @@ class ClientHandler {
         try {
             while (true) {
                 socket = tcpSocket.accept();
+                System.out.println("A client just connected");
                 out = new PrintWriter(socket.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String inputLine = "";
@@ -145,7 +146,7 @@ class ClientHandler {
                     String[] vectors = inputLine.split(" ");
                     if (vectors[1].contains(".")) {
                         String peerResp = handleForwardReq(vectors);
-                        System.out.println("Peer Response: "+ peerResp);
+                        System.out.println("Peer Response: " + peerResp);
                         out.println(peerResp);
                         continue;
                     }
@@ -155,18 +156,18 @@ class ClientHandler {
                             ArrayList<Integer> newArrayList = new ArrayList<>();
                             newArrayList.add(Integer.parseInt(vectors[2]));
                             map.put(vectors[1], newArrayList);
-                            out.println("Server : OK");
+                            out.println("Server : OK. Key set. "+arrayList);
                             System.out.println("Data set for key : " + vectors[1]);
                             break;
                         case "ADD":
                             arrayList.add(Integer.parseInt(vectors[2]));
                             map.put(vectors[1], arrayList);
-                            out.println("Server : OK");
+                            out.println("Server : OK. List is : "+arrayList);
                             System.out.println("Data added for key : " + vectors[1]);
                             break;
                         case "SUM":
                             sum = arrayList.stream().mapToInt(Integer::intValue).sum();
-                            out.println("Server : OK " + sum);
+                            out.println("Server : OK. Sum for the key: " + sum);
                             System.out.println("Data summed for key : " + vectors[1]);
                             break;
                         case "DELETE":
@@ -174,16 +175,21 @@ class ClientHandler {
                             out.println("Server : OK " + arrayList);
                             System.out.println("Data deleted for key : " + vectors[1]);
                             break;
-                        case"DSUM":
+                        case "DSUM":
                             sum = arrayList.stream().mapToInt(Integer::intValue).sum();
-                            int peerSum=handleDSUM(vectors);
-                            if(Arrays.asList(vectors).contains("INCLUDING")){
-                                peerSum+=sum;
+                            int peerSum = handleDSUM(vectors);
+                            if (Arrays.asList(vectors).contains("INCLUDING")) {
+                                peerSum += sum;
                             }
-                            out.println("Server : OK ");
-                            out.println("Server: DSUM = "+peerSum);
-                            System.out.println("Data DSUMED "+peerSum);
+//                            out.println("Server : OK ");
+                            out.println("Server: OK. Aggregate SUM = " + peerSum);
+                            System.out.println("Data Aggregate Sum " + peerSum);
                             break;
+                        case "DELETE_KEY":
+                            map.remove(vectors[1]);
+                            out.println("Data for Key "+vectors[1]+" Deleted: "+arrayList);
+                            System.out.println("Key "+vectors[1]+" and corresponding data deleted "+arrayList);
+
                         default:
                             out.println("Server: Error. Please Enter the correct command");
                     }
@@ -208,31 +214,31 @@ class ClientHandler {
         socket = new Socket(peerIP, peerPort);
         PrintWriter peerOut = new PrintWriter(socket.getOutputStream(), true);
         BufferedReader peerIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        String message="";
-        if(vectors.length>2){
-             message = vectors[0] + " " + dictionaryKey + " " + vectors[2];
-        }else {
-             message = vectors[0] + " " + dictionaryKey;
+        String message = "";
+        if (vectors.length > 2) {
+            message = vectors[0] + " " + dictionaryKey + " " + vectors[2];
+        } else {
+            message = vectors[0] + " " + dictionaryKey;
         }
         peerOut.println(message);
         //        System.out.println(resp);
         return peerIn.readLine();
     }
 
-    int handleDSUM(String [] vectors) throws IOException {
-        int sum=0;
-        if(vectors.length>3){
-            for(int i=2;i<vectors.length;i++){
-                if(vectors[i].equals("INCLUDING"))continue;
+    int handleDSUM(String[] vectors) throws IOException {
+        int sum = 0;
+        if (vectors.length > 3) {
+            for (int i = 2; i < vectors.length; i++) {
+                if (vectors[i].equals("INCLUDING")) continue;
                 String peer = vectors[i];
                 String peerIP = lookupTable.get(peer).split(" ")[0];
                 int peerPort = Integer.parseInt(lookupTable.get(peer).split(" ")[1]);
                 socket = new Socket(peerIP, peerPort);
                 PrintWriter peerOut = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader peerIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String msg="SUM "+vectors[1];
+                String msg = "SUM " + vectors[1];
                 peerOut.println(msg);
-                sum+= Integer.parseInt(peerIn.readLine().split(" ")[3]);
+                sum += Integer.parseInt(peerIn.readLine().split(" ")[3]);
             }
         }
         return sum;
