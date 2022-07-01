@@ -156,7 +156,7 @@ class ClientHandler {
                             ArrayList<Integer> newArrayList = new ArrayList<>();
                             newArrayList.add(Integer.parseInt(vectors[2]));
                             map.put(vectors[1], newArrayList);
-                            out.println("Server : OK. Key set. "+arrayList);
+                            out.println("Server : OK. Key set : "+vectors[1]);
                             System.out.println("Data set for key : " + vectors[1]);
                             break;
                         case "ADD":
@@ -199,7 +199,7 @@ class ClientHandler {
                             System.out.println("Request to clear repo executed");
                             break;
                         case "LIST_KEYS":
-                            if(!Objects.equals(vectors[1], "r0")){
+                            if(vectors[1].contains("r")){
                                 out.println(handlePeerKeyList(vectors[1]));
                                 break;
                             }
@@ -207,7 +207,7 @@ class ClientHandler {
                             out.println("Key List : "+keyList);
                             break;
                         case"LIST_VALUES":
-                            if(!Objects.equals(vectors[1], "r0")){
+                            if(vectors[1].contains("r")){
                                 out.println(handlePeerValsList(vectors[1]));
                                 break;
                             }
@@ -215,7 +215,7 @@ class ClientHandler {
                             out.println("Values associated with Key "+vectors[1]+ " : "+valueList);
                             break;
                         case "GET_VALUE":
-                            if(!Objects.equals(vectors[1], "r0")){
+                            if(vectors[1].contains("r")){
                                 out.println(handlePeerRandValList(vectors[1]));
                                 break;
                             }

@@ -16,6 +16,7 @@ public class Service_Deamon {
             Registry registry = LocateRegistry.createRegistry(1099);
             registry.rebind("DistributedRepositoryService", stub);
             System.out.println("Service Deamon Started");
+            System.out.println("Waiting for client...");
         } catch (Exception ex) {
             System.err.println("Something Occurred in Server");
             ex.printStackTrace();

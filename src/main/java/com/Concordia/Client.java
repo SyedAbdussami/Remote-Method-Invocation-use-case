@@ -39,7 +39,7 @@ public class Client {
 
             System.out.println("Repos key list: "+ server.KEY_LIST("r1"));
 
-            System.out.println("Repos key list: "+ server.LIST_VALUES("r1.A"));
+            System.out.println("Repos key list: "+ server.LIST_VALUES("A"));
             System.out.println("Repos key list: "+ server.GET_VALUE("r2.A"));
 
 
