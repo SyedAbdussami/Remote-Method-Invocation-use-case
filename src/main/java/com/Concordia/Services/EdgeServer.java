@@ -1,4 +1,4 @@
-package com.Concordia;
+package com.Concordia.Services;
 
 import com.Concordia.Core.Directory;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -189,7 +189,39 @@ class ClientHandler {
                             map.remove(vectors[1]);
                             out.println("Data for Key "+vectors[1]+" Deleted: "+arrayList);
                             System.out.println("Key "+vectors[1]+" and corresponding data deleted "+arrayList);
-
+                            break;
+                        case"RESET":
+                            if(!Objects.equals(vectors[1], "r0")){
+                                out.println(handlePeerReset(vectors));
+                                break;
+                            }
+                            map.clear();
+                            System.out.println("Request to clear repo executed");
+                            break;
+                        case "LIST_KEYS":
+                            if(!Objects.equals(vectors[1], "r0")){
+                                out.println(handlePeerKeyList(vectors[1]));
+                                break;
+                            }
+                            ArrayList<String> keyList=new ArrayList<>(map.keySet());
+                            out.println("Key List : "+keyList);
+                            break;
+                        case"LIST_VALUES":
+                            if(!Objects.equals(vectors[1], "r0")){
+                                out.println(handlePeerValsList(vectors[1]));
+                                break;
+                            }
+                            ArrayList<Integer> valueList=new ArrayList<>(map.get(vectors[1]));
+                            out.println("Values associated with Key "+vectors[1]+ " : "+valueList);
+                            break;
+                        case "GET_VALUE":
+                            if(!Objects.equals(vectors[1], "r0")){
+                                out.println(handlePeerRandValList(vectors[1]));
+                                break;
+                            }
+                            int randIndex=(int)(Math.random() * map.get(vectors[1]).size());
+                            out.println("A value associated with the Key "+vectors[1]+ " : "+map.get(vectors[1]).get(randIndex));
+                            break;
                         default:
                             out.println("Server: Error. Please Enter the correct command");
                     }
@@ -243,4 +275,63 @@ class ClientHandler {
         }
         return sum;
     }
+
+    boolean handlePeerReset(String[] vectors) throws IOException {
+        boolean flag=false;
+        if(vectors.length>2){
+            for(int i=1;i<vectors.length;i++){
+                String peer = vectors[i];
+                String peerIP = lookupTable.get(peer).split(" ")[0];
+                int peerPort = Integer.parseInt(lookupTable.get(peer).split(" ")[1]);
+                socket = new Socket(peerIP, peerPort);
+                PrintWriter peerOut = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader peerIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String message="RESET";
+                peerOut.println(message);
+                String resp=peerIn.readLine();
+                System.out.println("Reset Request Sent to Peer "+peer+" at port "+peerPort );
+                flag= Objects.equals(resp, "Repo reset");
+                System.out.println("Peer Response: "+resp);
+            }
+        }
+        return flag;
+    }
+    String handlePeerKeyList(String repo) throws IOException {
+        String peerIP = lookupTable.get(repo).split(" ")[0];
+        int peerPort = Integer.parseInt(lookupTable.get(repo).split(" ")[1]);
+        socket = new Socket(peerIP, peerPort);
+        PrintWriter peerOut = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader peerIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String message="LIST_KEYS";
+        peerOut.println(message);
+        String resp=peerIn.readLine();
+        System.out.println("Peer Response: "+resp);
+        return resp;
+    }
+    String handlePeerValsList(String repo) throws IOException {
+        String peerIP = lookupTable.get(repo).split(" ")[0];
+        int peerPort = Integer.parseInt(lookupTable.get(repo).split(" ")[1]);
+        socket = new Socket(peerIP, peerPort);
+        PrintWriter peerOut = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader peerIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String message="LIST_VALS";
+        peerOut.println(message);
+        String resp=peerIn.readLine();
+        System.out.println("Peer Response: "+resp);
+        return resp;
+    }
+
+    String handlePeerRandValList(String repo) throws IOException {
+        String peerIP = lookupTable.get(repo).split(" ")[0];
+        int peerPort = Integer.parseInt(lookupTable.get(repo).split(" ")[1]);
+        socket = new Socket(peerIP, peerPort);
+        PrintWriter peerOut = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader peerIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String message="LIST_VAL";
+        peerOut.println(message);
+        String resp=peerIn.readLine();
+        System.out.println("Peer Response: "+resp);
+        return resp;
+    }
+
 }

@@ -1,4 +1,4 @@
-package com.Concordia;
+package com.Concordia.Services;
 
 import com.Concordia.Core.Aggregate;
 import com.Concordia.Core.DistributedRepository;
@@ -84,6 +84,51 @@ public class RepositoryServiceImpl implements DistributedRepository {
         out.println(message);
         String resp=in.readLine();
         System.out.println("Aggregate SUM response :"+resp);
+        return resp;
+    }
+
+    @Override
+    public String RESET(String[] Repos) throws RemoteException, IOException {
+        StringBuilder repoList= new StringBuilder();
+        int lastRepo=Repos.length-1;
+        for(int i=0;i<Repos.length;i++){
+            if(i==lastRepo){
+                repoList.append(Repos[i]);
+                continue;
+            }
+            repoList.append(Repos[i]).append(" ");
+        }
+        String message="RESET "+repoList;
+        out.println(message);
+        String resp=in.readLine();
+        if(resp.equals("true")) System.out.println("Repo reset successfully");
+        return resp;
+    }
+
+    @Override
+    public String KEY_LIST(String repo) throws RemoteException, IOException {
+        String message= "LIST_KEYS "+repo;
+        out.println(message);
+        String resp=in.readLine();
+        System.out.println("List Keys response: "+resp);
+        return resp;
+    }
+
+    @Override
+    public String LIST_VALUES(String Key) throws RemoteException, IOException {
+        String message= "LIST_VALUES "+Key;
+        out.println(message);
+        String resp=in.readLine();
+        System.out.println("List Values for key "+Key+" response: "+resp);
+        return resp;
+    }
+
+    @Override
+    public String GET_VALUE(String Key) throws RemoteException, IOException {
+        String message= "GET_VALUE "+Key;
+        out.println(message);
+        String resp=in.readLine();
+        System.out.println("A Random Value associated with key "+Key+" response: "+resp);
         return resp;
     }
 }

@@ -1,4 +1,4 @@
-package com.Concordia;
+package com.Concordia.Services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -10,6 +10,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Peers {
@@ -73,12 +74,15 @@ public class Peers {
                 System.out.println("Request Received from " + socket.getInetAddress() + " " + socket.getPort());
                 String inputLine = in.readLine();
                 int sum;
-                if (!inputLine.contains(" ")) {
+                if (!inputLine.contains(" ")&& !inputLine.equals("RESET")&&!inputLine.equals("LIST_KEYS")) {
                     out.println("Server : Please Enter the correct command");
                     continue;
                 }
                 String[] vectors = inputLine.split(" ");
-                ArrayList<Integer> arrayList = map.get(vectors[1]);
+                ArrayList<Integer> arrayList=new ArrayList<>();
+                if(!Objects.equals(vectors[0], "RESET")&&!inputLine.equals("LIST_KEYS")){
+                    arrayList = map.get(vectors[1]);
+                }
                 switch (vectors[0]) {
                     case "SET":
                         ArrayList<Integer> newArrayList = new ArrayList<>();
@@ -102,6 +106,28 @@ public class Peers {
                         arrayList.remove(new Integer(vectors[2]));
                         out.println("Server : OK " + arrayList);
                         System.out.println("Data deleted for key : " + vectors[1]);
+                        break;
+                    case "DELETE_KEY":
+                        map.remove(vectors[1]);
+                        out.println("Data for Key "+vectors[1]+" Deleted: "+arrayList);
+                        System.out.println("Key "+vectors[1]+" and corresponding data deleted "+arrayList);
+                        break;
+                    case "RESET":
+                        map.clear();
+                        out.println("Repo reset");
+                        System.out.println("Request to reset repo executed");
+                        break;
+                    case "LIST_KEYS":
+                        ArrayList<String> keyList=new ArrayList<>(map.keySet());
+                        out.println("Key List : "+keyList);
+                        break;
+                    case"LIST_VALUES":
+                        ArrayList<Integer> valueList=new ArrayList<>(map.get(vectors[1]));
+                        out.println("Values associated with Key "+vectors[1]+ " : "+valueList);
+                        break;
+                    case "GET_VALUE":
+                        int randIndex=(int)(Math.random() * map.get(vectors[1]).size());
+                        out.println("A value associated with the Key "+vectors[1]+ " : "+map.get(vectors[1]).get(randIndex));
                         break;
                     default:
                         out.println("Error. Please Enter the correct command");

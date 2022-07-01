@@ -17,6 +17,11 @@ public interface Repository extends Remote {
 
     String DELETE_KEY(String Key) throws RemoteException,IOException;
 
+    String RESET(String[] repo) throws RemoteException,IOException;
 
+    String KEY_LIST(String repo) throws RemoteException,IOException;
 
+    String LIST_VALUES(String key) throws RemoteException,IOException;
+
+    String GET_VALUE(String key)throws  RemoteException,IOException;
 }
