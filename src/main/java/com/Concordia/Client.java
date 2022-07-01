@@ -14,7 +14,7 @@ public class Client {
         try {
             Registry registry = LocateRegistry.getRegistry();
             DistributedRepository server = (DistributedRepository) registry.lookup("DistributedRepositoryService");
-            //Invoke server methods
+            //Invoking remote methods
             System.out.println(server.SET("A", 5));
             System.out.println(server.ADD("A", 25));
             System.out.println(server.SUM("A"));
@@ -25,10 +25,12 @@ public class Client {
             System.out.println(server.ADD("r2.A", 200));
             System.out.println(server.ADD("r1.A", 45));
             String[] repos = {"r1", "r2"};
+            //Aggregate sum of r1 and r2
             System.out.println(server.aggregateSum(repos, "A"));
             System.out.println(server.SET("B", 89));
             System.out.println(server.ADD("B", 156));
             System.out.println(server.SUM("B"));
+            //deleting key b from repo0
             System.out.println(server.DELETE_KEY("B"));
 
             System.out.println(server.SET("V", 123));
@@ -42,7 +44,7 @@ public class Client {
             System.out.println("Repos key list: "+ server.LIST_VALUES("A"));
             System.out.println("Repos key list: "+ server.GET_VALUE("r2.A"));
 
-
+            //Reset all keys in repo r1 and r2
             System.out.println("Repos reset: "+server.RESET(repos));
 
         } catch (IOException ex) {
